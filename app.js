@@ -18,26 +18,41 @@ const shopRoutes = require('./routes/shop');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/admin', adminRoutes);
+app.use((req, res, next) => {
+
+    User.findById('611d978756833107c0b897a5')
+    .then(user => {
+        req.user = user;
+        next()
+    })
+    .catch (err => console.log(err))
+})
+
+app.use('/admin', adminRoutes); 
 app.use(shopRoutes);
 
 app.use(errorController.get404);
 
 mongoose.
   connect(
-    'mongodb+srv://TarasShop:meHanik88@cluster0.ixaop.mongodb.net/Shop?retryWrites=true&w=majority',  { useNewUrlParser: true, useUnifiedTopology: true }
+    'mongodb+srv://TarasShop:meHanik88@cluster0.ixaop.mongodb.net/Shop?retryWrites=true&w=majority',
+      { useNewUrlParser: true, useUnifiedTopology: true }
 ).then(result=>{
-    const user = new User({
+    User.findOne().then(user => {
+         if(!user){
+              const user = new User({
         name: 'terry',
         email: 'test@gmail.com',
         cart: {
             items: []
         }  
-    });
-    user.save()
+    });  
+        user.save()
+        }
+    }) 
 })
 .catch(err=>{console.log(err);
-}) ;
+}) 
 
 
 app.listen(3000, ()=>{console.log('listenning port 3000....');});
