@@ -13,7 +13,7 @@ exports.postAddProduct = (req, res) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  
+
   const product = new Product({
     title: title,
     imageUrl: imageUrl, 
@@ -21,7 +21,7 @@ exports.postAddProduct = (req, res) => {
     price: price
   });
   product
-  .save()
+  .save()  
   .then(result => {
     console.log('CREATED PRODUCT');
     res.redirect('/admin/products');
