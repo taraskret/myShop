@@ -6,7 +6,8 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session)
 const csrf = require('csurf');
-const flash =require('connect-flash')
+const flash =require('connect-flash');
+
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
@@ -14,11 +15,11 @@ const User = require('./models/user');
 const MONGODB_URI = 'mongodb+srv://TarasShop:meHanik88@cluster0.ixaop.mongodb.net/Shop';
 
 const app = express();
-
+ 
 const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: 'sessions'
-});
+});  
 const csrfProtection = csrf();
 
 

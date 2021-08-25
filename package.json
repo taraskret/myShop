@@ -23,8 +23,11 @@
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.17.2",
+    "mailchimp-api-v3": "^1.15.0",
     "mongodb": "^4.1.0",
     "mongoose": "^5.13.7",
+    "nodemailer": "^6.6.3",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "pug": "^2.0.3"
   }
 }
