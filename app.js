@@ -7,6 +7,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session)
 const csrf = require('csurf');
 const flash =require('connect-flash');
+const multer = require('multer')
 
 
 const errorController = require('./controllers/error');
@@ -22,9 +23,28 @@ const store = new MongoDBStore({
 });  
 const csrfProtection = csrf();
 
+const fileStorage = multer.diskStorage({
+ destination : (req, file, callback) => {
+    callback(null, 'images')
+  },
+  filename: (req, file, callback)=>{
+    callback(null, Date.now() + '-' +  file.originalname)
+  }
+});
+
+const fileFilter = (req, file, callback) => {
+if(file.mimetype === 'image/jpeg' || 
+file.mimetype === 'image/png' ||
+file.mimetype === 'image/jpg'
+){
+  callback(null, true)
+} else {
+  callback(null, false)
+}
+}
 
 app.set('view engine', 'ejs');
-app.set('views', 'views');
+app.set('views', 'views'); 
  
  
 const adminRoutes = require('./routes/admin');
@@ -33,6 +53,7 @@ const authRoutes = require('./routes/auth');
 
   
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('image'))
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(
