@@ -24,11 +24,11 @@ const store = new MongoDBStore({
 const csrfProtection = csrf();
 
 const fileStorage = multer.diskStorage({
- destination : (req, file, callback) => {
-    callback(null, 'images')
+ destination : (req, file, cb) => {
+    cb(null, './uploads')
   },
-  filename: (req, file, callback)=>{
-    callback(null, Date.now() + '-' +  file.originalname)
+  filename: (req, file, cb)=>{
+    cb(null,  Date.now() + '-' +  file.originalname)
   }
 });
 
@@ -55,6 +55,7 @@ const authRoutes = require('./routes/auth');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('image'))
 app.use(express.static(path.join(__dirname, 'public')));
+app.use( '/uploads',express.static(path.join(__dirname, 'uploads')));
 
 app.use(
   session(
@@ -108,7 +109,7 @@ app.use((error, req, res, next)=>{
    isAuthenticated: req.session.isLoggedIn
  });
 })
-   
+     
 mongoose
   .connect(
     MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }

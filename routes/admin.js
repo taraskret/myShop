@@ -37,8 +37,6 @@ router.post('/edit-product',
         .isString()
         .isLength({min: 3})
         .trim(),
-    check('imageUrl', 'please submit valid Image')
-        .isURL(),
     check('price', 'please submit valid Price')
         .isNumeric(),
     check('description', 'please submit valid Description')
