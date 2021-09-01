@@ -4,20 +4,40 @@ const PDFDocument = require('pdfkit');
 
 const Product = require('../models/product');
 const Order = require('../models/order');
-const Uder = require('../models/user');
-const { OrderedBulkOperation } = require('mongodb');
+
+const Items_Per_Page = 2;
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  const page = +req.query.page || 1;
+  let totalItems;
+
+  Product.find().countDocuments()
+  .then(numberProducts =>{
+    totalItems = numberProducts
+    return Product.find()
+  .skip((page-1)*Items_Per_Page)
+  .limit(Items_Per_Page)
+  })
   .then(products => {
     res.render('shop/product-list', {
       prods: products,
-      pageTitle: 'All Products',
-      path: '/products'
-
+      pageTitle: 'Products',
+      path: '/products',
+      currentPage : page,
+      hasNextPage: Items_Per_Page * page < totalItems,
+      hasPrevPage: page > 1,
+      nextPage: page + 1,
+      prevPage: page - 1,
+      lastPage:  Math.ceil(totalItems/Items_Per_Page)
     });
-  });
+  })
+  .catch(err => {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  })
 };
+
 
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
@@ -33,14 +53,34 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.find()
+  const page = +req.query.page || 1;
+  let totalItems;
+
+  Product.find().countDocuments()
+  .then(numberProducts =>{
+    totalItems = numberProducts
+    return Product.find()
+  .skip((page-1)*Items_Per_Page)
+  .limit(Items_Per_Page)
+  })
   .then(products => {
     res.render('shop/index', {
       prods: products,
       pageTitle: 'Shop',
-      path: '/'
+      path: '/',
+      currentPage : page,
+      hasNextPage: Items_Per_Page * page < totalItems,
+      hasPrevPage: page > 1,
+      nextPage: page + 1,
+      prevPage: page - 1,
+      lastPage:  Math.ceil(totalItems/Items_Per_Page)
     });
-  });
+  })
+  .catch(err => {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  })
 };
 
 
@@ -58,6 +98,29 @@ exports.getCart = (req, res, next) => {
     })
     .catch(err => console.log(err));
 };
+
+exports.getCheckout = (req, res) => {
+  req.user
+  .populate('cart.items.productId')
+  .execPopulate()
+    .then(user => {
+      const products = user.cart.items;
+      let total= 0;
+      products.forEach(p=>{
+        console.log(p);
+        total += p.quantity * p.productId.price
+      })
+      res.render('shop/checkout', {
+        path: '/checkout',
+        pageTitle: 'Checkout',
+        products: products,
+        totalSum: total
+      });
+      console.log(total);
+    })
+    .catch(err => console.log(err));
+}
+
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
